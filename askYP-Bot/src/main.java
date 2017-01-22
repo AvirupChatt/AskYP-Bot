@@ -35,7 +35,7 @@ public class main {
 	private static final String ACCESS_TOKEN = System.getenv("ACCESS_TOKEN");
 	private static final String ACCESS_SECRET = System.getenv("ACCESS_SECRET");
 
-	private static final String HASHTAG = "#abc123lmnop";
+	private static final String HASHTAG = "#askYP";
 
 	private static final String mongoUri = System.getenv("MONGODB_URI");
 	private static final String mongoName = System.getenv("MONGO_NAME");

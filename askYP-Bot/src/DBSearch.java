@@ -31,19 +31,23 @@ public class DBSearch {
 	public Document createTwitterUserObj(User twitter_usr, String location) {
 		//Check if duplicate
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		collection.drop();
+		//collection.drop();
 		Document doc = collection.find(eq("user_id",twitter_usr.getId())).first();
 		Document prev = doc;
 		if(doc!=null){
 			//User Exists
 			if(location.length()>0){
 				doc.put("location", location);
+				collection.updateOne(eq("user_id",twitter_usr.getId()), new Document("$set", new Document("location", location)));
 			}
 			else if(doc.getString("location").length() <= 0){
 				// no location stored so we (possibly) store one
 				doc.put("location", twitter_usr.getLocation());
+				collection.updateOne(eq("user_id",twitter_usr.getId()), new Document("$set", new Document("location", twitter_usr.getLocation())));
 			}
-			collection.updateOne(doc, prev);
+			System.out.println(prev.get("_id") + "   " + doc.get("_id"));
+			//collection.updateOne(doc, prev);
+			
 			return doc;
 		}
 		Document user_obj = new Document();
@@ -57,7 +61,7 @@ public class DBSearch {
 	public Document createMongoTweetObj(Status tweet, String parsed_iteminfo) {
 		//Check if duplicate
 		MongoCollection<Document> collection = db.getCollection("tweets");
-		collection.drop();
+		//collection.drop();
 		Document doc = collection.find(eq("tweet_id",tweet.getId())).first();
 		if(doc!=null){
 			System.out.println("tweet exits");
@@ -79,31 +83,38 @@ public class DBSearch {
 	public void updateTwitterUserwithTweet(User twitter_usr, Status tweet, String parsed_iteminfo){
 		Document twitter_user = createTwitterUserObj(twitter_usr, twitter_usr.getLocation());
 		Document tweet_obj = createMongoTweetObj(tweet, parsed_iteminfo);
-		try{
 		ArrayList<Long> tweet_ids = (ArrayList<Long>) twitter_user.get("tweet_ids");
+		try{
+		
 		tweet_ids.add(tweet_obj.getLong("tweet_id"));
 		twitter_user.put("tweet_ids",tweet_ids);
 		}catch(NullPointerException e){
-			ArrayList<Long> tweet_ids = new ArrayList<Long>();
+			tweet_ids = new ArrayList<Long>();
 			tweet_ids.add(tweet_obj.getLong("tweet_id"));
 			twitter_user.put("tweet_ids",tweet_ids);
 			
 		}
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		collection.drop();
-		collection.insertOne(twitter_user);
+		//collection.drop();
+		collection.updateOne(twitter_user, new Document("$set", new Document("tweet_ids", tweet_ids)));
+		//collection.insertOne(twitter_user);
 	}
 	
 	public boolean deleteTweet(Document saved_tweet, User twitter_usr){
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		collection.drop();
+		//collection.drop();
 		Document userdoc = collection.find(eq("user_id",twitter_usr.getId())).first();
 		ArrayList<Long> tweet_ids = (ArrayList<Long>) userdoc.get("tweet_ids");
-		tweet_ids.remove(saved_tweet.getLong("tweet_id"));
+		try{
+		tweet_ids.remove(saved_tweet.get("tweet_id"));
 		userdoc.put("tweet_ids", tweet_ids);
 		
+		}catch(NullPointerException e){
+			tweet_ids = new ArrayList<Long>();
+		}
+		collection.updateOne(userdoc, new Document("$set", new Document("tweet_ids", tweet_ids)));
 		MongoCollection<Document> tweetcollection = db.getCollection("tweets");
-		tweetcollection.drop();
+		//tweetcollection.drop();
 		tweetcollection.findOneAndDelete(saved_tweet);
 		return true;
 
@@ -114,7 +125,7 @@ public class DBSearch {
 	public String getTwitterUserLocation(User twitter_usr){
 		
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		collection.drop();
+		//collection.drop();
 		Document doc = collection.find(eq("user_id",twitter_usr.getId())).first();
 		if(doc!=null && doc.getString("location").length() > 0){
 			//User Exists and has location
@@ -135,14 +146,14 @@ public class DBSearch {
 		}
 		tweet_ids.add(tweet_obj.getLong("tweet_id"));
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		collection.drop();
+		//collection.drop();
 		twitter_user.put("tweet_ids", tweet_ids);
 		collection.insertOne(twitter_user);
 	}
 	public MongoCursor<Document> getSavedTweets(){
 		//Check if duplicate
 				MongoCollection<Document> collection = db.getCollection("tweets");
-				collection.drop();
+				//collection.drop();
 				MongoCursor<Document> cursor = null;
 				cursor = collection.find().iterator(); 
 				return cursor;

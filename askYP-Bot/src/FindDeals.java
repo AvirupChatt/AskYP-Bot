@@ -92,7 +92,11 @@ public class FindDeals {
   public void setUserInfo(double longitude, double latitude, String keywords) {
     LONGITUDE = longitude;
     LATITUDE = latitude;
-    KEYWORDS = keywords;
+    if(keywords.length() > 0){
+    	KEYWORDS = keywords;
+    	return;
+    }
+    keywords = "deals";
   }
   
   public void setUserInfoStringLoc(String location, String keywords){

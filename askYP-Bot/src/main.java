@@ -63,7 +63,7 @@ public class main {
 	public static boolean postTweetReply(long postId, String usrname,
 			String location, String keywords) throws IOException {
 		try {
-			Twitter twt = new TwitterFactory(cb.build()).getInstance();
+
 			FindDeals newDeals = new FindDeals();
 			googLocation gloc = new googLocation();
 			gloc.setCity(location);
@@ -75,7 +75,7 @@ public class main {
 				stat = new StatusUpdate("Hey @" + usrname + ", "
 						+ newDeals.getDeal());
 				//stat.setInReplyToStatusId(postId);
-				twt.updateStatus(stat);
+				twitter.updateStatus(stat);
 			} else {
 				// do something else
 			}
@@ -279,8 +279,7 @@ public class main {
 					MongoCursor<Document> cursor = dbsearch.getSavedTweets();
 					while (cursor.hasNext()) {
 						Document saved_tweet = cursor.next();
-						Status tweet_ob = twitter.showStatus(Long
-								.parseLong(saved_tweet.getString("tweet_id")));
+						Status tweet_ob = twitter.showStatus(saved_tweet.getLong("tweet_id"));
 						// get replies
 						ArrayList<Status> replies = getDiscussion(tweet_ob,
 								twitter);
@@ -307,7 +306,7 @@ public class main {
 						}
 					}
 					//dbsearch.closedb();
-				Thread.sleep(10000);
+				Thread.sleep(50000);
 			}
 
 		} catch (TwitterException e) {

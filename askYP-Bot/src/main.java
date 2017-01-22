@@ -65,10 +65,10 @@ public class main {
 		try {
 
 			FindDeals newDeals = new FindDeals();
-			googLocation gloc = new googLocation();
-			gloc.setCity(location);
+			//googLocation gloc = new googLocation();
+			//gloc.setCity(location);
 			
-			newDeals.setUserInfo(gloc.getLon(), gloc.getLat(), keywords);
+			newDeals.setUserInfo(73.56725599999999,45.5016889, keywords);
 			StatusUpdate stat;
 
 			if (newDeals.dealFound()) {
@@ -100,7 +100,7 @@ public class main {
 			System.out.println("query string: " + query.getQuery());
 
 			try {
-				query.setCount(100);
+				query.setCount(20);
 			} catch (Throwable e) {
 				// enlarge buffer error?
 				query.setCount(30);
@@ -306,7 +306,7 @@ public class main {
 						}
 					}
 					//dbsearch.closedb();
-				Thread.sleep(50000);
+				Thread.sleep(1200000);
 			}
 
 		} catch (TwitterException e) {

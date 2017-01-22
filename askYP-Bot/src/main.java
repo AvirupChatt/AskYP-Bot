@@ -275,7 +275,7 @@ public class main {
 						}
 
 					}
-					// check saved tweets
+					// check saved tweet
 					MongoCursor<Document> cursor = dbsearch.getSavedTweets();
 					while (cursor.hasNext()) {
 						Document saved_tweet = cursor.next();

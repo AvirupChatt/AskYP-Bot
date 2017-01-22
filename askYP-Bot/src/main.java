@@ -306,7 +306,7 @@ public class main {
 							}
 						}
 					}
-					dbsearch.closedb();
+					//dbsearch.closedb();
 				Thread.sleep(10000);
 			}
 

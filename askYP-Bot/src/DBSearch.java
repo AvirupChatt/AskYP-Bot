@@ -31,8 +31,9 @@ public class DBSearch {
 	public Document createTwitterUserObj(User twitter_usr, String location) {
 		//Check if duplicate
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		//collection.drop();
+		collection.drop();
 		Document doc = collection.find(eq("user_id",twitter_usr.getId())).first();
+		Document prev = doc;
 		if(doc!=null){
 			//User Exists
 			if(location.length()>0){
@@ -42,20 +43,21 @@ public class DBSearch {
 				// no location stored so we (possibly) store one
 				doc.put("location", twitter_usr.getLocation());
 			}
+			collection.updateOne(doc, prev);
 			return doc;
 		}
 		Document user_obj = new Document();
 		user_obj.put("user_id", twitter_usr.getId());
 		user_obj.put("screenname", twitter_usr.getScreenName());
 		user_obj.put("location", twitter_usr.getLocation());
-		
+		collection.insertOne(user_obj);
 		return user_obj;
 	}
 
 	public Document createMongoTweetObj(Status tweet, String parsed_iteminfo) {
 		//Check if duplicate
 		MongoCollection<Document> collection = db.getCollection("tweets");
-		//collection.drop();
+		collection.drop();
 		Document doc = collection.find(eq("tweet_id",tweet.getId())).first();
 		if(doc!=null){
 			System.out.println("tweet exits");
@@ -70,7 +72,7 @@ public class DBSearch {
 		if (tweet.getGeoLocation() != null) {
 			tweet_obj.put("location", tweet.getGeoLocation());
 		}
-		
+		collection.insertOne(tweet_obj);
 		return tweet_obj;
 
 	}
@@ -87,11 +89,14 @@ public class DBSearch {
 			twitter_user.put("tweet_ids",tweet_ids);
 			
 		}
+		MongoCollection<Document> collection = db.getCollection("twitter_users");
+		collection.drop();
+		collection.insertOne(twitter_user);
 	}
 	
 	public boolean deleteTweet(Document saved_tweet, User twitter_usr){
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		//collection.drop();
+		collection.drop();
 		Document userdoc = collection.find(eq("user_id",twitter_usr.getId())).first();
 		ArrayList<Long> tweet_ids = (ArrayList<Long>) userdoc.get("tweet_ids");
 		tweet_ids.remove(saved_tweet.getLong("tweet_id"));
@@ -107,8 +112,9 @@ public class DBSearch {
 	}
 	
 	public String getTwitterUserLocation(User twitter_usr){
+		
 		MongoCollection<Document> collection = db.getCollection("twitter_users");
-		//collection.drop();
+		collection.drop();
 		Document doc = collection.find(eq("user_id",twitter_usr.getId())).first();
 		if(doc!=null && doc.getString("location").length() > 0){
 			//User Exists and has location
@@ -128,7 +134,10 @@ public class DBSearch {
 			return;
 		}
 		tweet_ids.add(tweet_obj.getLong("tweet_id"));
+		MongoCollection<Document> collection = db.getCollection("twitter_users");
+		collection.drop();
 		twitter_user.put("tweet_ids", tweet_ids);
+		collection.insertOne(twitter_user);
 	}
 	public MongoCursor<Document> getSavedTweets(){
 		//Check if duplicate
